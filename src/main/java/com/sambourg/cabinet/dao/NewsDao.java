@@ -12,5 +12,7 @@ import com.sambourg.cabinet.model.News;
 public interface NewsDao {
 	
 	public void saveNews(News news);
+	
+	public void updateNews(News news);
 
 }

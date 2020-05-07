@@ -5,6 +5,8 @@ package com.sambourg.cabinet.dao.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +58,21 @@ public class NewsDaoImpl implements NewsDao {
 				.setValueAsync(new News(news.getTitre(), 
 						news.getImage(), news.getLien(), news.getDescriptif()));
 
+	}
+
+	@Override
+	public void updateNews(News news) {
+		getFirebase();
+		String key = news.getKey();
+		DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+		DatabaseReference actu = database.child("news");
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(key + "/titre", news.getTitre());
+		map.put(key + "/descriptif", news.getDescriptif());
+		map.put(key + "/image", news.getImage());
+		map.put(key + "/lien", news.getLien());
+		actu.updateChildrenAsync(map);
+		
 	}
 
 }

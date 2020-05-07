@@ -30,5 +30,13 @@ public class NewsController {
 		News p = g.fromJson(news, News.class);
 		newsDaoImpl.saveNews(p);
 	}
+	
+	@PostMapping(value = "/sambourg/updateNews")
+	@ResponseBody
+	public void updateNews(@RequestBody String news) {
+		Gson g = new Gson();
+		News p = g.fromJson(news, News.class);
+		newsDaoImpl.updateNews(p);
+	}
 
 }
