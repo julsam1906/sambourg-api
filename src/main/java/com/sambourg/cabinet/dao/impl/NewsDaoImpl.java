@@ -15,8 +15,11 @@ import org.springframework.stereotype.Repository;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.sambourg.cabinet.dao.NewsDao;
 import com.sambourg.cabinet.model.News;
 
@@ -73,6 +76,60 @@ public class NewsDaoImpl implements NewsDao {
 		map.put(key + "/lien", news.getLien());
 		actu.updateChildrenAsync(map);
 		
+	}
+
+	@Override
+	public void deleteNews(String titre) {
+		getFirebase();
+		DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+		database.child("news").addListenerForSingleValueEvent(new ValueEventListener() {
+
+			@Override
+			public void onDataChange(DataSnapshot snapshot) {
+				for (DataSnapshot snap : snapshot.getChildren()) {
+					for (DataSnapshot sn : snap.getChildren()) {
+						if (sn.getValue(String.class).equals(titre)) {
+							snap.getRef().setValueAsync(null);
+							break;
+						}
+					}
+				}
+
+			}
+
+			@Override
+			public void onCancelled(DatabaseError error) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+	}
+
+	@Override
+	public Map<String, News> getAll() {
+		getFirebase();
+		Map<String, News> mapNews = new HashMap<>();
+		DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+		database.child("news").addListenerForSingleValueEvent(new ValueEventListener() {
+
+			@Override
+			public void onDataChange(DataSnapshot snapshot) {
+				for (DataSnapshot snap : snapshot.getChildren()) {
+					News news = snap.getValue(News.class);
+					news.setKey(snap.getKey());
+					mapNews.put(snap.getKey(), news);
+				}
+			}
+
+			@Override
+			public void onCancelled(DatabaseError error) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		log.info("Fin de getAll dao");
+		return mapNews;
 	}
 
 }
