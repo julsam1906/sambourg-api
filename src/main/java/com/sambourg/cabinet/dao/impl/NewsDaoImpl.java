@@ -88,8 +88,9 @@ public class NewsDaoImpl implements NewsDao {
 			public void onDataChange(DataSnapshot snapshot) {
 				for (DataSnapshot snap : snapshot.getChildren()) {
 					for (DataSnapshot sn : snap.getChildren()) {
-						if (sn.getValue(String.class).equals(titre)) {
+						if (sn.getValue(String.class).trim().equals(titre.trim())) {
 							snap.getRef().setValueAsync(null);
+							log.info("valeur mise à nulle");
 							break;
 						}
 					}
@@ -111,6 +112,7 @@ public class NewsDaoImpl implements NewsDao {
 		getFirebase();
 		Map<String, News> mapNews = new HashMap<>();
 		DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+		
 		database.child("news").addListenerForSingleValueEvent(new ValueEventListener() {
 
 			@Override
@@ -128,6 +130,7 @@ public class NewsDaoImpl implements NewsDao {
 
 			}
 		});
+		
 		log.info("Fin de getAll dao");
 		return mapNews;
 	}

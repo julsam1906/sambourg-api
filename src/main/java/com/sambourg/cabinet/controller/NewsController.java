@@ -5,9 +5,14 @@ package com.sambourg.cabinet.controller;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,11 +35,13 @@ import com.sambourg.cabinet.model.News;
  *
  */
 @RestController
-@CrossOrigin(origins = {"http://localhost:3000", "https://youtube.com"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:4200"}, allowCredentials = "true")
 public class NewsController {
 
 	@Autowired
 	private NewsDaoImpl newsDaoImpl;
+
+	private Log log = LogFactory.getLog(NewsController.class);
 
 	@PostMapping(value = "/sambourg/saveNews")
 	@ResponseBody
@@ -55,29 +62,24 @@ public class NewsController {
 	@DeleteMapping(value = "/sambourg/deleteNews")
 	@ResponseBody
 	public void deleteNews(@RequestParam(value = "titre") String titre) {
+		log.info("Titre : "+titre.getClass());
 		newsDaoImpl.deleteNews(titre);
 	}
 	
-	@GetMapping(value = "/sambourg/allNews", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/sambourg/allNews")
 	@ResponseBody
-	public String getAllNews() {
-		Map<String, News> map = new HashMap<String, News>();
-		String json = "";
-		Map<String, News> news = newsDaoImpl.getAll();
-		final Instant deadline = Instant.now().plus(500, ChronoUnit.MILLIS);
-		while ((Instant.now().isBefore(deadline)) && (news.size() == 0)) {
-		}
+	public List<News> getAllNews() throws InterruptedException {
 
+		Map<String, News> news = newsDaoImpl.getAll();
+		List<News> list = new ArrayList<News>();
+		do {
+			log.info(new Date());
+		}while (news.size() == 0);
 		for (Map.Entry<String, News> entry : news.entrySet()) {
-			map.put(entry.getKey(), entry.getValue());
+			list.add(entry.getValue());
 		}
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			json = mapper.writeValueAsString(map);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		return json;
+		
+		return list;
 	}
 
 }
